@@ -25,6 +25,7 @@ pub fn insert_plugin_data(
 ) -> AppSpec {
   app_spec.AppSpec(
     spec.plugin_storage
-    |> dict.insert(plugin_data_key, plugin_data_value),
+      |> dict.insert(plugin_data_key, plugin_data_value),
+    spec.codegen_root_path,
   )
 }
