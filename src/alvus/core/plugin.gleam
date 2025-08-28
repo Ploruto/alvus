@@ -2,8 +2,11 @@ import alvus/core/app_spec.{type AppSpec}
 import gleam/dict
 import gleam/dynamic.{type Dynamic}
 import gleam/dynamic/decode
+import gleam/list
 import gleam/option.{type Option}
 import gleam/result
+import gleam/string
+import simplifile
 
 pub type GeneratedFile {
   GeneratedFile(path: String, description: String, content: String)
@@ -29,4 +32,29 @@ pub fn insert_plugin_data(
     spec.codegen_root_path,
     logs: spec.logs,
   )
+}
+
+fn write_codegen_files(
+  app_spec: AppSpec,
+  files: List(GeneratedFile),
+) -> Result(Nil, String) {
+  simplifile.create_directory(app_spec.codegen_root_path)
+
+  files
+  |> list.each(fn(file) {
+    case
+      simplifile.write(
+        to: app_spec.codegen_root_path |> string.append(file.path),
+        contents: file.content,
+      )
+    {
+      Ok(_) -> {
+        todo
+      }
+      Error(err) -> {
+        echo err
+      }
+    }
+  })
+  Ok(Nil)
 }
