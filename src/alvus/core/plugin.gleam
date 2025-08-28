@@ -38,21 +38,47 @@ pub fn write_codegen_files(
   app_spec: AppSpec,
   files: List(GeneratedFile),
 ) -> Result(Nil, String) {
+  simplifile.delete(app_spec.codegen_root_path)
   simplifile.create_directory(app_spec.codegen_root_path)
 
   files
   |> list.each(fn(file) {
-    case
-      simplifile.write(
-        to: app_spec.codegen_root_path |> string.append(file.path),
-        contents: file.content,
-      )
-    {
+    // first create the parent dirs up until the file to be created;
+    let path_parts = string.split(file.path, "/")
+    let path_without_filename =
+      list.take(path_parts, list.length(path_parts) - 1)
+      |> string.join("/")
+
+    let dir_creation_result = case path_without_filename |> string.is_empty() {
+      True -> Ok(Nil)
+      False ->
+        simplifile.create_directory_all(
+          app_spec.codegen_root_path
+          |> string.append("/")
+          |> string.append(path_without_filename),
+        )
+    }
+
+    case dir_creation_result {
       Ok(_) -> {
-        todo
+        case
+          simplifile.write(
+            to: app_spec.codegen_root_path
+              |> string.append("/")
+              |> string.append(file.path),
+            contents: file.content,
+          )
+        {
+          Ok(_) -> Nil
+          Error(err) -> {
+            echo err
+            Nil
+          }
+        }
       }
       Error(err) -> {
         echo err
+        Nil
       }
     }
   })
