@@ -34,7 +34,7 @@ pub fn insert_plugin_data(
   )
 }
 
-fn write_codegen_files(
+pub fn write_codegen_files(
   app_spec: AppSpec,
   files: List(GeneratedFile),
 ) -> Result(Nil, String) {
